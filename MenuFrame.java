@@ -2,44 +2,49 @@
 // DEMONSTRANDO O USO DE MENUS.
 
 // IMPORTANDO BIBLIOTECAS NECESSÁRIAS
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
-import javax.swing.JFrame;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.ButtonGroup;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JMenuBar;
+import java.awt.*;
+
+import java.awt.event.*;
+
+import javax.swing.*;
+
 
 // DEFINIÇÃO DA CLASSE MENUFRAME QUE HERDA DE JFRAME
 public class MenuFrame extends JFrame {
+
    // ARRAY DE CORES QUE PODEM SER SELECIONADAS NO MENU
+   
    private final Color[] colorValues = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN};
    // ARRAY DE ITENS DO MENU DE BOTÕES DE RÁDIO PARA ESCOLHER CORES
+   
    private final JRadioButtonMenuItem[] colorItems;
+   
    // ARRAY DE ITENS DO MENU DE BOTÕES DE RÁDIO PARA ESCOLHER FONTES
    private final JRadioButtonMenuItem[] fonts;
-   // ARRAY DE ITENS DO MENU DE CAIXA DE SELEÇÃO PARA ESTILOS DE FONTE (NEGRITO/ITÁLICO)
+
+   // ARRAY DE SIZE 
+   private final JRadioButtonMenuItem[] sizes;
+
+
+   // ARRAY DE ITENS DO MENU DE CAIXA DE SELEÇÃO PARA TAMANHO DE FONTE
    private final JCheckBoxMenuItem[] styleItems;
+
    // RÓTULO QUE EXIBE O TEXTO EXEMPLO NA INTERFACE
    private final JLabel displayJLabel;
+
    // GRUPOS DE BOTÕES PARA GERENCIAR ITENS DE MENU DE FONTES E CORES
    private final ButtonGroup fontButtonGroup;
    private final ButtonGroup colorButtonGroup;
+   private final ButtonGroup sizeButtonGroup;
+
    // VARIÁVEL PARA ARMAZENAR O ESTILO DA FONTE (NEGRITO/ITÁLICO/PLAIN)
    private int style;
 
+   private final int[] fontSizes = {12,24,48,72};
+
    // CONSTRUTOR DA CLASSE MENUFRAME
    public MenuFrame() {
+     
       // CHAMA O CONSTRUTOR DA SUPERCLASSE (JFRAME) E DEFINE O TÍTULO DA JANELA
       super("Using JMenus");
 
@@ -51,9 +56,11 @@ public class MenuFrame extends JFrame {
       JMenuItem aboutItem = new JMenuItem("About...");
       aboutItem.setMnemonic('A'); // ATALHO: ALT + A
       fileMenu.add(aboutItem); // ADICIONA O ITEM AO MENU "FILE"
+      
       // ADICIONA UM OUVINTE DE AÇÃO (EVENTO) PARA O ITEM "ABOUT..."
       aboutItem.addActionListener(
          new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent event) {
                // EXIBE UMA MENSAGEM INFORMATIVA QUANDO "ABOUT..." É SELECIONADO
@@ -86,6 +93,7 @@ public class MenuFrame extends JFrame {
 
       // CRIA UM MENU "FORMAT" (FORMATAR)
       JMenu formatMenu = new JMenu("Format");
+      
       formatMenu.setMnemonic('r'); // ATALHO: ALT + R
 
       // CRIA O MENU "COLOR" DENTRO DO MENU "FORMAT"
@@ -95,7 +103,9 @@ public class MenuFrame extends JFrame {
 
       // CRIA OS ITENS DE MENU DE BOTÃO DE RÁDIO PARA AS CORES
       colorItems = new JRadioButtonMenuItem[colors.length];
+
       colorButtonGroup = new ButtonGroup(); // GERENCIA OS BOTÕES DE RÁDIO
+
       ItemHandler itemHandler = new ItemHandler(); // MANIPULADOR DE EVENTOS
 
       // ADICIONA OS ITENS DO MENU DE CORES
@@ -141,13 +151,31 @@ public class MenuFrame extends JFrame {
          styleItems[count].addItemListener(styleHandler);
       }
 
+      
+      fontMenu.addSeparator(); // ADICIONA UMA LINHA SEPARADORA
+
+      // CRIA OS ITENS DE MENU DE CAIXA DE SELEÇÃO PARA ESTILOS DE FONTE
+     
+      sizes = new JRadioButtonMenuItem[fontSizes.length];
+      sizeButtonGroup = new ButtonGroup();
+
+      for (int count = 0; count < fontSizes.length; count++) {
+         sizes[count] = new JRadioButtonMenuItem(String.valueOf(fontSizes[count]));
+         fontMenu.add(sizes[count]);
+         sizeButtonGroup.add(sizes[count]);;
+         sizes[count].addActionListener(itemHandler);
+      }
+
+         sizes[3].setSelected(true);
+
+
       formatMenu.add(fontMenu); // ADICIONA O MENU "FONT" AO MENU "FORMAT"
       bar.add(formatMenu); // ADICIONA O MENU "FORMAT" À BARRA DE MENUS
 
       // CONFIGURAÇÃO DO RÓTULO QUE EXIBE O TEXTO EXEMPLO
       displayJLabel = new JLabel("Sample Text", SwingConstants.CENTER);
       displayJLabel.setForeground(colorValues[0]); // COR PADRÃO: PRETO
-      displayJLabel.setFont(new Font("Serif", Font.PLAIN, 72)); // FONTE PADRÃO
+      displayJLabel.setFont(new Font("Serif", Font.PLAIN, fontSizes[3])); // FONTE PADRÃO
 
       getContentPane().setBackground(Color.CYAN); // COR DE FUNDO DA JANELA
       add(displayJLabel, BorderLayout.CENTER); // ADICIONA O RÓTULO AO CENTRO
@@ -155,26 +183,54 @@ public class MenuFrame extends JFrame {
 
    // CLASSE INTERNA PARA MANIPULAR AÇÕES DE ITENS DE MENU
    private class ItemHandler implements ActionListener {
+     
       @Override
       public void actionPerformed(ActionEvent event) {
-         // VERIFICA QUAL COR FOI SELECIONADA E ATUALIZA O RÓTULO
+        
+
+       definirTamaho();
+
+         
+       definirFonte();
+        
+      definirCor();
+         repaint(); // REDESEMHA A JANELA
+      }
+   }
+
+   public void definirCor(){
+      // VERIFICA QUAL COR FOI SELECIONADA E ATUALIZA O RÓTULO
          for (int count = 0; count < colorItems.length; count++) {
             if (colorItems[count].isSelected()) {
                displayJLabel.setForeground(colorValues[count]);
                break;
             }
          }
+   
+   }
 
-         // VERIFICA QUAL FONTE FOI SELECIONADA E ATUALIZA O RÓTULO
+   public void definirFonte(){
+      // VERIFICA QUAL FONTE FOI SELECIONADA E ATUALIZA O RÓTULO
          for (int count = 0; count < fonts.length; count++) {
-            if (event.getSource() == fonts[count]) {
-               displayJLabel.setFont(new Font(fonts[count].getText(), style, 72));
+            if (fonts[count].isSelected()) {
+               displayJLabel.setFont(new Font(fonts[count].getText(), 
+               displayJLabel.getFont().getStyle(), 
+               displayJLabel.getFont().getSize()));
             }
          }
-
-         repaint(); // REDESEMHA A JANELA
-      }
    }
+
+   public void definirTamaho(){
+       // VERIFICA QUAL TAMAHO FOI SELECIONADA E ATUALIZA O RÓTULO
+         for (int count = 0; count < sizes.length; count++) {
+            if (sizes[count].isSelected()) {
+               displayJLabel.setFont(new Font(displayJLabel.getFont().getName(), 
+               displayJLabel.getFont().getStyle(),
+               fontSizes[count]));
+            }
+         }
+   }
+
 
    // CLASSE INTERNA PARA MANIPULAR A SELEÇÃO DE ESTILO (NEGRITO/ITÁLICO)
    private class StyleHandler implements ItemListener {
@@ -199,3 +255,4 @@ public class MenuFrame extends JFrame {
       }
    }
 }
+
